@@ -1,0 +1,249 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Time World — History Explorer</title>
+
+  <script src="https://unpkg.com/globe.gl"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #050b18;
+      color: #eef5ff;
+      font-family: Arial, sans-serif;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 6%;
+      border-bottom: 1px solid #1d2c43;
+    }
+
+    .logo {
+      font-size: 25px;
+      font-weight: bold;
+      color: #65caff;
+      letter-spacing: 2px;
+    }
+
+    nav { color: #b8c8df; }
+
+    nav a {
+      color: inherit;
+      text-decoration: none;
+      margin-left: 18px;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 35px 15px 5px;
+    }
+
+    .hero h1 {
+      font-size: clamp(30px, 5vw, 55px);
+      margin-bottom: 10px;
+    }
+
+    .hero p { color: #9eb2cc; }
+
+    #globeViz {
+      width: 100%;
+      height: 480px;
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    .timeline {
+      max-width: 850px;
+      margin: 10px auto 35px;
+      padding: 20px;
+      text-align: center;
+      background: #101d32;
+      border: 1px solid #263b59;
+      border-radius: 16px;
+    }
+
+    input { width: 100%; accent-color: #55c7ff; }
+
+    #year { color: #62caff; font-size: 26px; }
+
+    .events {
+      max-width: 1000px;
+      margin: 35px auto;
+      padding: 20px;
+    }
+
+    .event {
+      background: #101d32;
+      border: 1px solid #263b59;
+      border-radius: 12px;
+      padding: 18px;
+      margin: 12px 0;
+      cursor: pointer;
+    }
+
+    .event:hover { border-color: #55c7ff; }
+
+    .event p { color: #a9bad0; }
+
+    footer {
+      padding: 25px;
+      text-align: center;
+      color: #8195af;
+      border-top: 1px solid #1d2c43;
+    }
+
+    @media (max-width: 600px) {
+      header { padding: 16px; }
+      nav a { margin-left: 8px; font-size: 12px; }
+      #globeViz { height: 360px; }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">TIME WORLD</div>
+  <nav>
+    <a href="#globeViz">Globe</a>
+    <a href="#timeline">Timeline</a>
+    <a href="#events">History</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <h1>Explore the History of Everything</h1>
+  <p>One planet. Billions of years. Countless stories.</p>
+</section>
+
+<div id="globeViz"></div>
+
+<section class="timeline" id="timeline">
+  <h2>Time Machine</h2>
+  <div id="year">2026 CE</div>
+  <p>Move through human history</p>
+  <input id="yearSlider" type="range"
+    min="-3000" max="2026" value="2026">
+</section>
+
+<section class="events" id="events">
+  <h2>Explore Historical Events</h2>
+  <div id="eventList"></div>
+</section>
+
+<footer>
+  TIME WORLD © 2026 — Explore our shared history.
+</footer>
+
+<script>
+  const events = [
+    {
+      name: "Ancient Egypt",
+      year: -2600,
+      lat: 29.9792,
+      lng: 31.1342,
+      info: "The pyramids of Giza were built in ancient Egypt."
+    },
+    {
+      name: "Ancient Babylon",
+      year: -1800,
+      lat: 32.5364,
+      lng: 44.4200,
+      info: "Babylon became an important center of Mesopotamia."
+    },
+    {
+      name: "Ancient Greece",
+      year: -500,
+      lat: 37.9838,
+      lng: 23.7275,
+      info: "Athens became a major center of philosophy and culture."
+    },
+    {
+      name: "Roman Empire",
+      year: 100,
+      lat: 41.9028,
+      lng: 12.4964,
+      info: "Rome was one of the most influential cities of the ancient world."
+    },
+    {
+      name: "Samarkand",
+      year: 750,
+      lat: 39.6542,
+      lng: 66.9597,
+      info: "Samarkand became an important center on the Silk Road."
+    }
+  ];
+
+  const globe = Globe()
+    (document.getElementById("globeViz"))
+    .globeImageUrl(
+      "https://unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
+    )
+    .backgroundColor("#050b18")
+    .pointsData(events)
+    .pointLat("lat")
+    .pointLng("lng")
+    .pointAltitude(0.08)
+    .pointRadius(0.65)
+    .pointColor(() => "#62caff")
+    .pointLabel("name");
+
+  globe.controls().autoRotate = true;
+  globe.controls().autoRotateSpeed = 0.45;
+
+  const slider = document.getElementById("yearSlider");
+  const yearLabel = document.getElementById("year");
+  const eventList = document.getElementById("eventList");
+
+  function showEvents(year) {
+    yearLabel.textContent =
+      year < 0 ? Math.abs(year) + " BCE" : year + " CE";
+
+    const visible = events.filter(event => event.year <= year);
+
+    eventList.innerHTML = "";
+
+    visible.slice().reverse().forEach(event => {
+      const card = document.createElement("div");
+      card.className = "event";
+      const date = event.year < 0
+        ? Math.abs(event.year) + " BCE"
+        : event.year + " CE";
+
+      const title = document.createElement("h3");
+      title.textContent = event.name + " — " + date;
+
+      const description = document.createElement("p");
+      description.textContent = event.info;
+
+      card.append(title, description);
+
+      card.addEventListener("click", () => {
+        globe.pointOfView({
+          lat: event.lat,
+          lng: event.lng,
+          altitude: 1.5
+        }, 1200);
+      });
+
+      eventList.appendChild(card);
+    });
+  }
+
+  slider.addEventListener("input", () => {
+    showEvents(Number(slider.value));
+  });
+
+  showEvents(2026);
+</script>
+
+</body>
+</html>
