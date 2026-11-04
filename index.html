@@ -198,6 +198,10 @@
 
   globe.controls().autoRotate = true;
   globe
+  .showAtmosphere(true)
+  .atmosphereColor('#87ceeb')
+  .atmosphereAltitude(0.2);
+  globe
   .bumpImageUrl('https://unpkg.com/three-globe/example/img/earth-topology.png')
   .showAtmosphere(true)
   .atmosphereColor('lightskyblue')
